@@ -27,4 +27,5 @@
 #include "cpappexec.h"
 #include "cpapproleexec.h"
 #include "cpasmexec.h"
+#include "cpimpcompexec.h"
 #include "cpsubsexec.h"

@@ -183,6 +183,11 @@ extern "C" UINT __stdcall ComPlusInstallExecute(MSIHANDLE hInstall)
     ExitOnFailure(hr, "Failed to register assemblies");
     if (S_FALSE == hr) ExitFunction();
 
+    // register imported components
+    hr = CpiConfigureImportedComponents(&pwzData, hRollbackFile);
+    ExitOnFailure(hr, "Failed to register imported components");
+    if (S_FALSE == hr) ExitFunction();
+
     // create role assignments
     hr = CpiConfigureRoleAssignments(&pwzData, hRollbackFile);
     ExitOnFailure(hr, "Failed to create role assignments");
@@ -260,6 +265,11 @@ extern "C" UINT __stdcall ComPlusInstallExecuteCommit(MSIHANDLE hInstall)
     // register assemblies
     hr = CpiConfigureAssemblies(&pwzData, hRollbackFile);
     ExitOnFailure(hr, "Failed to register assemblies");
+    if (S_FALSE == hr) ExitFunction();
+
+    // register imported components
+    hr = CpiConfigureImportedComponents(&pwzData, hRollbackFile);
+    ExitOnFailure(hr, "Failed to register imported components");
     if (S_FALSE == hr) ExitFunction();
 
     // create role assignments
@@ -502,6 +512,11 @@ extern "C" UINT __stdcall ComPlusUninstallExecute(MSIHANDLE hInstall)
     // unregister assemblies
     hr = CpiConfigureAssemblies(&pwzData, hRollbackFile);
     ExitOnFailure(hr, "Failed to unregister assemblies");
+    if (S_FALSE == hr) ExitFunction();
+
+    // unregister imported components
+    hr = CpiConfigureImportedComponents(&pwzData, hRollbackFile);
+    ExitOnFailure(hr, "Failed to unregister imported components");
     if (S_FALSE == hr) ExitFunction();
 
     // remove users in application roles

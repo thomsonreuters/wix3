@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the Microsoft Reciprocal License. See LICENSE.TXT file in the project root for full license information. -->
-
-
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -23,7 +21,6 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F72D34CA-48DA-4DFD-91A9-A0C78BEF6981}</ProjectGuid>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -31,14 +28,11 @@
     <TargetName>cpexec</TargetName>
     <ProjectModuleDefinitionFile>cpexec.def</ProjectModuleDefinitionFile>
   </PropertyGroup>
-
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), wix.proj))\tools\WixBuild.props" />
-
   <PropertyGroup>
     <ProjectAdditionalIncludeDirectories>$(WixRoot)src\libs\dutil\inc;$(WixRoot)src\libs\wcautil</ProjectAdditionalIncludeDirectories>
     <ProjectAdditionalLinkLibraries>msi.lib;dutil$(MultiTargetTargetNameSuffix).lib;wcautil$(MultiTargetTargetNameSuffix).lib</ProjectAdditionalLinkLibraries>
   </PropertyGroup>
-
   <ItemGroup>
     <ClCompile Include="cpappexec.cpp" />
     <ClCompile Include="cpapproleexec.cpp" />
@@ -53,6 +47,7 @@
     <ClInclude Include="cpappexec.h" />
     <ClInclude Include="cpapproleexec.h" />
     <ClInclude Include="cpasmexec.h" />
+    <ClInclude Include="cpimpcompexec.h" />
     <ClInclude Include="cppartexec.h" />
     <ClInclude Include="cppartroleexec.h" />
     <ClInclude Include="cpsubsexec.h" />
@@ -65,6 +60,5 @@
   <ItemGroup>
     <ResourceCompile Include="cpexec.rc" />
   </ItemGroup>
-
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), wix.proj))\tools\WixBuild.targets" />
 </Project>
