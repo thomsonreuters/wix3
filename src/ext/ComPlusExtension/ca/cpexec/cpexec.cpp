@@ -509,14 +509,14 @@ extern "C" UINT __stdcall ComPlusUninstallExecute(MSIHANDLE hInstall)
     ExitOnFailure(hr, "Failed to delete role assignments");
     if (S_FALSE == hr) ExitFunction();
 
-    // unregister assemblies
-    hr = CpiConfigureAssemblies(&pwzData, hRollbackFile);
-    ExitOnFailure(hr, "Failed to unregister assemblies");
-    if (S_FALSE == hr) ExitFunction();
-
     // unregister imported components
     hr = CpiConfigureImportedComponents(&pwzData, hRollbackFile);
     ExitOnFailure(hr, "Failed to unregister imported components");
+    if (S_FALSE == hr) ExitFunction();
+
+    // unregister assemblies
+    hr = CpiConfigureAssemblies(&pwzData, hRollbackFile);
+    ExitOnFailure(hr, "Failed to unregister assemblies");
     if (S_FALSE == hr) ExitFunction();
 
     // remove users in application roles

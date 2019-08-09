@@ -38,6 +38,7 @@
     <ClCompile Include="cpapproleexec.cpp" />
     <ClCompile Include="cpasmexec.cpp" />
     <ClCompile Include="cpexec.cpp" />
+    <ClCompile Include="cpimpcompexec.cpp" />
     <ClCompile Include="cppartexec.cpp" />
     <ClCompile Include="cppartroleexec.cpp" />
     <ClCompile Include="cpsubsexec.cpp" />
