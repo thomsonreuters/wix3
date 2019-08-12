@@ -138,9 +138,67 @@ LExit:
 
 static void FreeImportedComponentAttributes(
     __in CPI_IMPORTED_COMPONENT_ATTRIBUTES* pAttrs
-)
+    )
 {
     ReleaseStr(pAttrs->pwzKey);
     ReleaseStr(pAttrs->pwzAppID);
     ReleaseStr(pAttrs->pwzPartID);
+}
+
+static HRESULT RegisterImportedComponent(
+    __in CPI_IMPORTED_COMPONENT_ATTRIBUTES* pAttrs
+    )
+{
+    HRESULT hr = S_OK;
+
+    ICOMAdminCatalog* piCatalog = NULL;
+    ICOMAdminCatalog2* piCatalog2 = NULL;
+    BSTR bstrGlobPartID = NULL;
+
+    BSTR bstrPartID = NULL;
+    BSTR bstrAppID = NULL;
+    BSTR bstrClsID = NULL;
+
+    // progress message
+    hr = CpiActionDataMessage(1, pAttrs->wzClsId);
+    ExitOnFailure(hr, "Failed to send progress messages");
+
+    if (S_FALSE == hr)
+    {
+        ExitFunction(); // aborted by user
+    }
+
+    // log
+    WcaLog(LOGMSG_VERBOSE, "Registering imported component, key: %S", pAttrs->pwzKey);
+
+    // Unlike assemblies, there is no differences in native or managed.
+
+    // Create BSTRs for parameters
+    if (pAttrs->pwzPartID && *pAttrs->pwzPartID)
+    {
+        bstrPartID = ::SysAllocString(pAttrs->pwzPartID);
+        ExitOnNull(bstrPartID, hr, E_OUTOFMEMORY, "Failed to allocate BSTR for partition id");
+    }
+
+    bstrAppID = ::SysAllocString(pAttrs->pwzAppID);
+    ExitOnNull(bstrAppID, hr, E_OUTOFMEMORY, "Failed to allocate BSTR for application id");
+
+    bstrClsID = ::SysAllocString(pAttrs->wzClsId);
+    ExitOnNull(bstrClsID, hr, E_OUTOFMEMORY, "Failed to allocate BSTR for class id");
+
+#error pick up here with getting the catalog.
+
+    // Not supporting a component list yet.
+
+LExit:
+    // clean up
+    ReleaseObject(piCatalog);
+    ReleaseObject(piCatalog2);
+    ReleaseBSTR(bstrGlobPartID);
+
+    ReleaseBSTR(bstrPartID);
+    ReleaseBSTR(bstrAppID);
+    ReleaseBSTR(bstrClsID);
+
+    return hr;
 }
