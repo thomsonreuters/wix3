@@ -16,6 +16,8 @@ HRESULT CpiConfigureImportedComponents(
     WCHAR wzCLSID[CPI_MAX_GUID + 1];
     ::ZeroMemory(wzCLSID, sizeof(wzCLSID));
 
+    int iActionType = eActionType::atNoOp;
+
     // initialize
     // TODO: Write a function that initializes globals for tracking.
 
@@ -34,6 +36,10 @@ HRESULT CpiConfigureImportedComponents(
 
     for (int i = 0; i < iCnt; ++i)
     {
+        // Read Action
+        hr = WcaReadIntegerFromCaData(ppwzData, &iActionType);
+        ExitOnFailure(hr, "Failed to read action type");
+
         // Read clsid
         hr = WcaReadStringFromCaData(ppwzData, &pwzData);
         ExitOnFailure(hr, "Failed to read clsid");
@@ -44,10 +50,24 @@ HRESULT CpiConfigureImportedComponents(
         ExitOnFailure(hr, "Failed to write key/clsid to rollback file");
 
         // action
-
         switch (iActionType)
         {
-#error pick up here
+        case eActionType::atCreate:
+            hr = RegisterImportedComponent(/*payload*/);
+            ExitOnFailure1(hr, "Failed to register imorted comonent, guid %S", wzCLSID);
+            break;
+        case eActionType::atRemove:
+            hr = UnregisterImportedComponent(/*payload*/);
+            ExitOnFailure1(hr, "Failed to unregister imported component, guid: %S", wzCLSID);
+            break;
+        default:
+            hr = S_OK;
+            break;
+        }
+
+        if (S_FALSE == hr)
+        {
+            ExitFunction(); // aborted by user
         }
     }
 
