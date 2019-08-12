@@ -22,6 +22,9 @@ static HRESULT ReadImportedComponentAttributes(
     __deref_in LPWSTR* ppwzData,
     __out CPI_IMPORTED_COMPONENT_ATTRIBUTES* pAttrs
     );
+static void FreeImportedComponentAttributes(
+    __in CPI_IMPORTED_COMPONENT_ATTRIBUTES* pAttrs
+    );
 static HRESULT RegisterImportedComponent(
     __in CPI_IMPORTED_COMPONENT_ATTRIBUTES* pAttrs
     );
@@ -90,6 +93,10 @@ HRESULT CpiConfigureImportedComponents(
     }
 
 LExit:
+    // clean up
+    FreeImportedComponentAttributes(&attrs);
+
+    // TODO: Uninitialize?
 
     return hr;
 }
@@ -127,4 +134,13 @@ LExit:
     ReleaseStr(pwzData);
 
     return hr;
+}
+
+static void FreeImportedComponentAttributes(
+    __in CPI_IMPORTED_COMPONENT_ATTRIBUTES* pAttrs
+)
+{
+    ReleaseStr(pAttrs->pwzKey);
+    ReleaseStr(pAttrs->pwzAppID);
+    ReleaseStr(pAttrs->pwzPartID);
 }
