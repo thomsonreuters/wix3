@@ -2,6 +2,33 @@
 
 #include "precomp.h"
 
+// private structs
+
+// Similar to CPI_ASSEMBLY_ATTRIBUTES
+struct CPI_IMPORTED_COMPONENT_ATTRIBUTES
+{
+    int iActionType;
+    int iActionCost;
+    LPWSTR pwzKey;
+    WCHAR wzClsId[CPI_MAX_GUID + 1];
+    LPWSTR pwzAppID;
+    LPWSTR pwzPartID;
+    // Attributes?
+};
+
+// prototypes for private helper functions
+
+static HRESULT ReadImportedComponentAttributes(
+    __deref_in LPWSTR* ppwzData,
+    __out CPI_IMPORTED_COMPONENT_ATTRIBUTES* pAttrs
+    );
+static HRESULT RegisterImportedComponent(
+    __in CPI_IMPORTED_COMPONENT_ATTRIBUTES* pAttrs
+    );
+static HRESULT UnregisterImportedComponent(
+    __in CPI_IMPORTED_COMPONENT_ATTRIBUTES* pAttrs
+    );
+
 // function definitions
 
 HRESULT CpiConfigureImportedComponents(
@@ -11,12 +38,8 @@ HRESULT CpiConfigureImportedComponents(
 {
     HRESULT hr = E_NOTIMPL;
 
-    LPWSTR pwzData = NULL;
-
-    WCHAR wzCLSID[CPI_MAX_GUID + 1];
-    ::ZeroMemory(wzCLSID, sizeof(wzCLSID));
-
-    int iActionType = eActionType::atNoOp;
+    CPI_IMPORTED_COMPONENT_ATTRIBUTES attrs;
+    ::ZeroMemory(&attrs, sizeof(attrs));
 
     // initialize
     // TODO: Write a function that initializes globals for tracking.
@@ -36,29 +59,24 @@ HRESULT CpiConfigureImportedComponents(
 
     for (int i = 0; i < iCnt; ++i)
     {
-        // Read Action
-        hr = WcaReadIntegerFromCaData(ppwzData, &iActionType);
-        ExitOnFailure(hr, "Failed to read action type");
+        // read attributes from CustomActionData
+        hr = ReadImportedComponentAttributes(ppwzData, &attrs);
+        ExitOnFailure(hr, "Failed to read imported component attributes");
 
-        // Read clsid
-        hr = WcaReadStringFromCaData(ppwzData, &pwzData);
-        ExitOnFailure(hr, "Failed to read clsid");
-        StringCchCopyW(wzCLSID, countof(wzCLSID), pwzData);
-
-        // Write Guid? to rollback file
-        hr = CpiWriteKeyToRollbackFile(hRollbackFile, wzCLSID);
-        ExitOnFailure(hr, "Failed to write key/clsid to rollback file");
+        // write key to rollback file
+        hr = CpiWriteKeyToRollbackFile(hRollbackFile, attrs.pwzKey);
+        ExitOnFailure(hr, "Failed to write key to rollback file");
 
         // action
-        switch (iActionType)
+        switch (attrs.iActionType)
         {
-        case eActionType::atCreate:
-            hr = RegisterImportedComponent(/*payload*/);
-            ExitOnFailure1(hr, "Failed to register imorted comonent, guid %S", wzCLSID);
+        case atCreate:
+            hr = RegisterImportedComponent(&attrs);
+            ExitOnFailure1(hr, "Failed to register imorted comonent, key: %S", attrs.pwzKey);
             break;
-        case eActionType::atRemove:
-            hr = UnregisterImportedComponent(/*payload*/);
-            ExitOnFailure1(hr, "Failed to unregister imported component, guid: %S", wzCLSID);
+        case atRemove:
+            hr = UnregisterImportedComponent(&attrs);
+            ExitOnFailure1(hr, "Failed to unregister imported component, key: %S", attrs.pwzKey);
             break;
         default:
             hr = S_OK;
@@ -70,6 +88,39 @@ HRESULT CpiConfigureImportedComponents(
             ExitFunction(); // aborted by user
         }
     }
+
+LExit:
+
+    return hr;
+}
+
+static HRESULT ReadImportedComponentAttributes(
+    __deref_in LPWSTR* ppwzData,
+    __out CPI_IMPORTED_COMPONENT_ATTRIBUTES* pAttrs
+    )
+{
+    HRESULT hr = S_OK;
+
+    LPWSTR pwzData = NULL;
+
+    // read attributes
+    hr = WcaReadIntegerFromCaData(ppwzData, &pAttrs->iActionType);
+    ExitOnFailure(hr, "Failed to read action type");
+    hr = WcaReadIntegerFromCaData(ppwzData, &pAttrs->iActionCost);
+    ExitOnFailure(hr, "Failed to read action cost");
+    hr = WcaReadStringFromCaData(ppwzData, &pAttrs->pwzKey);
+    ExitOnFailure(hr, "Failed to read key");
+    // Read clsid
+    hr = WcaReadStringFromCaData(ppwzData, &pwzData);
+    ExitOnFailure(hr, "Failed to read clsid");
+    hr = StringCchCopyW(pAttrs->wzClsId, countof(pAttrs->wzClsId), pwzData);
+    ExitOnFailure(hr, "Failed to copy clsid");
+    hr = WcaReadStringFromCaData(ppwzData, &pAttrs->pwzAppID);
+    ExitOnFailure(hr, "Failed to read application id");
+    hr = WcaReadStringFromCaData(ppwzData, &pAttrs->pwzPartID);
+    ExitOnFailure(hr, "Failed to read partition id");
+
+    hr = S_OK;
 
 LExit:
     // clean up
