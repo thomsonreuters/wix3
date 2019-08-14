@@ -244,3 +244,16 @@ LExit:
 
     return hr;
 }
+
+static HRESULT UnregisterImportedComponent(
+    __in CPI_IMPORTED_COMPONENT_ATTRIBUTES* pAttrs
+    )
+{
+    HRESULT hr = S_OK;
+
+    // TODO: Make this actually work, but for now...
+    hr = E_NOTIMPL;
+
+LExit:
+    return hr;
+}
