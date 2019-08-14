@@ -145,6 +145,7 @@ static void FreeImportedComponentAttributes(
     ReleaseStr(pAttrs->pwzPartID);
 }
 
+// Lots of this code was inpired by RegisterNativeAssembly() in cpasmexec.cpp
 static HRESULT RegisterImportedComponent(
     __in CPI_IMPORTED_COMPONENT_ATTRIBUTES* pAttrs
     )
@@ -186,9 +187,50 @@ static HRESULT RegisterImportedComponent(
     bstrClsID = ::SysAllocString(pAttrs->wzClsId);
     ExitOnNull(bstrClsID, hr, E_OUTOFMEMORY, "Failed to allocate BSTR for class id");
 
-#error pick up here with getting the catalog.
+    // get catalog
+    hr = CpiGetAdminCatalog(&piCatalog);
+    ExitOnFailure(hr, "Failed to get COM+ admin catalog");
 
-    // Not supporting a component list yet.
+    // get ICOMAdminCatalog2 interface
+    hr = piCatalog->QueryInterface(IID_ICOMAdminCatalog2, (void**)&piCatalog2);
+
+    // COM+ 1.5 or later
+    if (E_NOINTERFACE != hr)
+    {
+        ExitOnFailure(hr, "Failed to get IID_ICOMAdminCatalog2 interface");
+
+        // partition id
+        if (!bstrPartID)
+        {
+            // get global partition id
+            hr = piCatalog2->get_GlobalPartitionID(&bstrGlobPartID);
+            ExitOnFailure(hr, "Failed to get global partition id");
+        }
+
+        // set current partition
+        hr = piCatalog2->put_CurrentPartition(bstrPartID ? bstrPartID : bstrGlobPartID);
+        ExitOnFailure(hr, "Failed to set current partition");
+    }
+
+    // COM+ pre 1.5
+    else
+    {
+        // this version of COM+ does not support partitions, make sure a partition was not specified
+        if (bstrPartID)
+        {
+            ExitOnFailure(hr = E_FAIL, "Partitions are not supported by this version of COM+");
+        }
+    }
+
+    hr = piCatalog->ImportComponent(bstrAppID, bstrClsID);
+    if (COMADMIN_E_OBJECTERRORS == hr)
+    {
+        CpiLogCatalogErrorInfo();
+    }
+
+    ExitOnFailure(hr, "Failed to import components");
+
+    hr = S_OK;
 
 LExit:
     // clean up
