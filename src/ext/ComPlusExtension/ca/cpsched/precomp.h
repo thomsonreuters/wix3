@@ -25,4 +25,5 @@
 #include "cpappsched.h"
 #include "cpapprolesched.h"
 #include "cpasmsched.h"
+#include "cpimpcompsched.h"
 #include "cpsubssched.h"
