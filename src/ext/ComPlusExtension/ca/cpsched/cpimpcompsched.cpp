@@ -69,12 +69,37 @@ HRESULT CpiImportedComponentsInstall(
     for (CPI_IMPORTEDCOMPONENT* pItm = pList->pFirst; pItm; pItm = pItm->pNext)
     {
         // Process only items that need action during install
+
         // Assemblies had a check with WcaIsInstalling() Not sure if that deserves replication.
         // I think it might, because the Application seems to have the ability to be in a
         // different component from the assembly and this could get really really complex.
         // Check out the code in AssembliesRead().
-#error resume coding here.
+
+        // The purpose of aaRunInCommit's is explained in the manual
+        // for the ComPlusAssembly element. Not repeating it here yet.
+
+        //action type
+        if (rmRollback == iRunMode)
+        {
+            // Bizarro check on ItemState to do here
+            iActionType = atRemove;
+        }
+        else
+        {
+            iActionType = atCreate;
+        }
+
+        hr = AddImportedComponentToActionData(pItm, TRUE, iActionType, COST_IMPORTED_COMPONENT_REGISTER, ppwzActionData);
+        ExitOnFailure1(hr, "Failed to add imported component to custom action data, key: %S", pItm->wzKey);
     }
+
+    // Add progress tics
+    if (piProgress)
+    {
+        *piProgress += COST_IMPORTED_COMPONENT_REGISTER * iCount;
+    }
+
+    hr = S_OK;
 
 LExit:
     return hr;
