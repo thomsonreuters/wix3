@@ -89,14 +89,14 @@ HRESULT CpiImportedComponentsInstall(
             iActionType = atCreate;
         }
 
-        hr = AddImportedComponentToActionData(pItm, TRUE, iActionType, COST_IMPORTED_COMPONENT_REGISTER, ppwzActionData);
+        hr = AddImportedComponentToActionData(pItm, TRUE, iActionType, COST_IMPORTED_COMPONENT_CREATE, ppwzActionData);
         ExitOnFailure1(hr, "Failed to add imported component to custom action data, key: %S", pItm->wzKey);
     }
 
     // Add progress tics
     if (piProgress)
     {
-        *piProgress += COST_IMPORTED_COMPONENT_REGISTER * iCount;
+        *piProgress += COST_IMPORTED_COMPONENT_CREATE * iCount;
     }
 
     hr = S_OK;
