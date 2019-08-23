@@ -113,10 +113,10 @@ LExit:
 }
 
 HRESULT CpiImportedComponentsUninstall(
-    __in CPI_IMPORTEDCOMPONENT_LIST* pList,
-    int iRunMode,
-    __deref_out_z_opt LPWSTR* ppwzActionData,
-    __inout int* piProgress
+    __in CPI_IMPORTEDCOMPONENT_LIST* /*pList*/,
+    int /*iRunMode*/,
+    __deref_out_z_opt LPWSTR* /*ppwzActionData*/,
+    __inout int* /*piProgress*/
     )
 {
     HRESULT hr = S_OK;
@@ -124,13 +124,13 @@ HRESULT CpiImportedComponentsUninstall(
     // TODO: Make this actually work, but for now...
     hr = E_NOTIMPL;
 
-LExit:
+//LExit:
     return hr;
 }
 
 static HRESULT AddImportedComponentToActionData(
     __in CPI_IMPORTEDCOMPONENT* pItm,
-    BOOL fInstall,
+    BOOL /*fInstall*/,
     int iActionType,
     int iActionCost,
     __deref_out_z_opt LPWSTR* ppwzActionData

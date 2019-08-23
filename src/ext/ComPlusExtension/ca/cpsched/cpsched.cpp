@@ -73,6 +73,7 @@ extern "C" UINT __stdcall ConfigureComPlusInstall(MSIHANDLE hInstall)
     CPI_APPLICATION_LIST appList;
     CPI_APPLICATION_ROLE_LIST appRoleList;
     CPI_USER_IN_APPLICATION_ROLE_LIST usrInAppRoleList;
+    CPI_IMPORTEDCOMPONENT_LIST impCompList;
     CPI_ASSEMBLY_LIST asmList;
     CPI_SUBSCRIPTION_LIST subList;
 
@@ -92,6 +93,7 @@ extern "C" UINT __stdcall ConfigureComPlusInstall(MSIHANDLE hInstall)
     ::ZeroMemory(&appList, sizeof(CPI_APPLICATION_LIST));
     ::ZeroMemory(&appRoleList, sizeof(CPI_APPLICATION_ROLE_LIST));
     ::ZeroMemory(&usrInAppRoleList, sizeof(CPI_USER_IN_APPLICATION_ROLE_LIST));
+    ::ZeroMemory(&impCompList, sizeof(CPI_IMPORTEDCOMPONENT_LIST));
     ::ZeroMemory(&asmList, sizeof(CPI_ASSEMBLY_LIST));
     ::ZeroMemory(&subList, sizeof(CPI_SUBSCRIPTION_LIST));
 
@@ -180,6 +182,12 @@ extern "C" UINT __stdcall ConfigureComPlusInstall(MSIHANDLE hInstall)
         MessageExitOnFailure(hr, msierrComPlusUserInApplicationRoleReadFailed, "Failed to read ComPlusUserInApplicationRole table");
     }
 
+    if (CpiTableExists(/*TODO: Table*/42))
+    {
+        hr = CpiImportedComponentsRead(&impCompList, &asmList);
+        MessageExitOnFailure(hr, msierrComPlusImportedComponentReadFailed, "Failed to read ComPlusTODO table")
+    }
+
     if (CpiTableExists(cptComPlusAssembly))
     {
         hr = CpiAssembliesRead(&appList, &appRoleList, &asmList);
@@ -235,6 +243,8 @@ extern "C" UINT __stdcall ConfigureComPlusInstall(MSIHANDLE hInstall)
         ExitOnFailure(hr, "Failed to install subscriptions");
         hr = CpiRoleAssignmentsInstall(&asmList, rmRollback, &pwzRollbackActionData, NULL);
         ExitOnFailure(hr, "Failed to install assemblies");
+        hr = CpiImportedComponentsInstall(&impCompList, rmRollback, &pwzRollbackActionData, NULL);
+        ExitOnFailure(hr, "Failed to install imported components");
         hr = CpiAssembliesInstall(&asmList, rmRollback, &pwzRollbackActionData, NULL);
         ExitOnFailure(hr, "Failed to install assemblies");
         hr = CpiUsersInApplicationRolesInstall(&usrInAppRoleList, rmRollback, &pwzRollbackActionData, NULL);
@@ -271,6 +281,8 @@ extern "C" UINT __stdcall ConfigureComPlusInstall(MSIHANDLE hInstall)
         ExitOnFailure(hr, "Failed to install users in application roles");
         hr = CpiAssembliesInstall(&asmList, rmDeferred, &pwzActionData, &iProgress);
         ExitOnFailure(hr, "Failed to install assemblies");
+        hr = CpiImportedComponentsInstall(&impCompList, rmDeferred, &pwzActionData, &iProgress);
+        ExitOnFailure(hr, "Failed to install imported components");
         hr = CpiRoleAssignmentsInstall(&asmList, rmDeferred, &pwzActionData, &iProgress);
         ExitOnFailure(hr, "Failed to install assemblies");
         hr = CpiSubscriptionsInstall(&subList, rmDeferred, &pwzActionData, &iProgress);
@@ -285,6 +297,8 @@ extern "C" UINT __stdcall ConfigureComPlusInstall(MSIHANDLE hInstall)
 
         hr = CpiAssembliesInstall(&asmList, rmCommit, &pwzCommitActionData, &iCommitProgress);
         ExitOnFailure(hr, "Failed to install assemblies");
+        hr = CpiImportedComponentsInstall(&impCompList, rmCommit, &pwzCommitActionData, &iCommitProgress);
+        ExitOnFailure(hr, "Failed to install imported components");
         hr = CpiRoleAssignmentsInstall(&asmList, rmCommit, &pwzCommitActionData, &iCommitProgress);
         ExitOnFailure(hr, "Failed to install assemblies");
         hr = CpiSubscriptionsInstall(&subList, rmCommit, &pwzCommitActionData, &iCommitProgress);

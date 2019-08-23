@@ -43,7 +43,10 @@ struct CPI_IMPORTEDCOMPONENT_LIST
 void CpiImportedComponentListFree(
     __in CPI_IMPORTEDCOMPONENT_LIST* pList
     );
-// Probably a Read
+HRESULT CpiImportedComponentsRead(
+    __inout CPI_IMPORTEDCOMPONENT_LIST* pImpCompList,
+    __in CPI_ASSEMBLY_LIST* pAsmList
+    );
 // What's the purpose of a VerifyInstall?
 // What's the purpose of a VerifyUninstall?
 HRESULT CpiImportedComponentsInstall(
