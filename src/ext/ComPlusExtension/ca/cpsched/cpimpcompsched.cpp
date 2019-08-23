@@ -11,6 +11,13 @@
 
 // prototypes for private helper functions
 
+static HRESULT AddImportedComponentToActionData(
+    __in CPI_IMPORTEDCOMPONENT* pItm,
+    BOOL fInstall,
+    int iActionType,
+    int iActionCost,
+    __deref_out_z_opt LPWSTR* ppwzActionData
+    );
 static void ImportedComponentFree(
     __in CPI_IMPORTEDCOMPONENT* pItm
     );
@@ -105,6 +112,60 @@ LExit:
     return hr;
 }
 
+HRESULT CpiImportedComponentsUninstall(
+    __in CPI_IMPORTEDCOMPONENT_LIST* pList,
+    int iRunMode,
+    __deref_out_z_opt LPWSTR* ppwzActionData,
+    __inout int* piProgress
+    )
+{
+    HRESULT hr = S_OK;
+
+    // TODO: Make this actually work, but for now...
+    hr = E_NOTIMPL;
+
+LExit:
+    return hr;
+}
+
+static HRESULT AddImportedComponentToActionData(
+    __in CPI_IMPORTEDCOMPONENT* pItm,
+    BOOL fInstall,
+    int iActionType,
+    int iActionCost,
+    __deref_out_z_opt LPWSTR* ppwzActionData
+    )
+{
+    HRESULT hr = S_OK;
+
+    // add action information to custom action data
+    hr = WcaWriteIntegerToCaData(iActionType, ppwzActionData);
+    ExitOnFailure(hr, "Failed to add action type to custom action data");
+    hr = WcaWriteIntegerToCaData(iActionCost, ppwzActionData);
+    ExitOnFailure(hr, "Failed to add action cost to custom action data");
+
+    // add imported component information to custom action data
+    hr = WcaWriteStringToCaData(pItm->wzKey, ppwzActionData);
+    ExitOnFailure(hr, "Failed to add imported component key to custom action data");
+    hr = WcaWriteStringToCaData(pItm->wzCLSID, ppwzActionData);
+    ExitOnFailure(hr, "Failed to add imported component clsid to custom action data");
+
+    // add application information to custom action data
+    hr = WcaWriteStringToCaData(pItm->pApplication ? pItm->pApplication->wzID : L"", ppwzActionData);
+    ExitOnFailure(hr, "Failed to add application id to custom action data");
+
+    // add partition information to custom action data
+    LPCWSTR pwzPartID = pItm->pApplication && pItm->pApplication->pPartition ? pItm->pApplication->pPartition->wzID : L"";
+    hr = WcaWriteStringToCaData(pwzPartID, ppwzActionData);
+    ExitOnFailure(hr, "Failed to add partition id to custom action data");
+
+    // Assemblies have sub components. We don't.
+
+    hr = S_OK;
+
+LExit:
+    return hr;
+}
 
 static void ImportedComponentFree(
     __in CPI_IMPORTEDCOMPONENT* pItm
