@@ -184,7 +184,7 @@ extern "C" UINT __stdcall ConfigureComPlusInstall(MSIHANDLE hInstall)
 
     if (CpiTableExists(/*TODO: Table*/42))
     {
-        hr = CpiImportedComponentsRead(&impCompList, &asmList);
+        hr = CpiImportedComponentsRead(&appList, &impCompList);
         MessageExitOnFailure(hr, msierrComPlusImportedComponentReadFailed, "Failed to read ComPlusTODO table")
     }
 

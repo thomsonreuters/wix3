@@ -18,7 +18,7 @@ struct CPI_IMPORTEDCOMPONENT
 
     // Not doing Role Assignments at this time.
 
-    // No INSTALLSTATE because this isn't a file that actually gets INSTALLED.
+    INSTALLSTATE isInstalled, isAction;
 
     CPI_APPLICATION* pApplication;
 
@@ -44,8 +44,8 @@ void CpiImportedComponentListFree(
     __in CPI_IMPORTEDCOMPONENT_LIST* pList
     );
 HRESULT CpiImportedComponentsRead(
-    __inout CPI_IMPORTEDCOMPONENT_LIST* pImpCompList,
-    __in CPI_ASSEMBLY_LIST* pAsmList
+    __in CPI_APPLICATION_LIST* pAppList,
+    __inout CPI_IMPORTEDCOMPONENT_LIST* pImpCompList
     );
 // What's the purpose of a VerifyInstall?
 // What's the purpose of a VerifyUninstall?

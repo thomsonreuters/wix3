@@ -21,7 +21,10 @@ static HRESULT AddImportedComponentToActionData(
 static void ImportedComponentFree(
     __in CPI_IMPORTEDCOMPONENT* pItm
     );
-
+static HRESULT ImportedComponentsRead(
+    __in CPI_APPLICATION_LIST* pAppList,
+    __inout CPI_IMPORTEDCOMPONENT_LIST* pImpCompList
+    );
 // function definitions
 
 void CpiImportedComponentListFree(
@@ -36,6 +39,24 @@ void CpiImportedComponentListFree(
         pItm = pItm->pNext;
         ImportedComponentFree(pDelete);
     }
+}
+
+HRESULT CpiImportedComponentsRead(
+    __in CPI_APPLICATION_LIST* pAppList,
+    __inout CPI_IMPORTEDCOMPONENT_LIST* pImpCompList
+    )
+{
+    HRESULT hr = S_OK;
+
+    hr = ImportedComponentsRead(pAppList, pImpCompList);
+    ExitOnFailure(hr, "Failed to read TODO table");
+
+    // Any sorting?
+
+    hr = S_OK;
+
+LExit:
+    return hr;
 }
 
 HRESULT CpiImportedComponentsInstall(
@@ -75,12 +96,10 @@ HRESULT CpiImportedComponentsInstall(
     // add imported components to custom action data in forward order
     for (CPI_IMPORTEDCOMPONENT* pItm = pList->pFirst; pItm; pItm = pItm->pNext)
     {
-        // Process only items that need action during install
-
-        // Assemblies had a check with WcaIsInstalling() Not sure if that deserves replication.
-        // I think it might, because the Application seems to have the ability to be in a
-        // different component from the assembly and this could get really really complex.
-        // Check out the code in AssembliesRead().
+        if (!WcaIsInstalling(pItm->isInstalled, pItm->isAction))
+        {
+            continue;
+        }
 
         // The purpose of aaRunInCommit's is explained in the manual
         // for the ComPlusAssembly element. Not repeating it here yet.
@@ -125,6 +144,94 @@ HRESULT CpiImportedComponentsUninstall(
     hr = E_NOTIMPL;
 
 //LExit:
+    return hr;
+}
+
+static HRESULT ImportedComponentsRead(
+    __in CPI_APPLICATION_LIST* pAppList,
+    __inout CPI_IMPORTEDCOMPONENT_LIST* pImpCompList
+    )
+{
+    HRESULT hr = S_OK;
+    UINT er = ERROR_SUCCESS;
+
+    PMSIHANDLE hView, hRec;
+
+    CPI_IMPORTEDCOMPONENT* pItm = NULL;
+    LPWSTR pwzData = NULL;
+    LPWSTR pwzComponent = NULL;
+
+    // loop through all imported components
+    hr = WcaOpenExecuteView(L"TODO", &hView);
+    ExitOnFailure(hr, "Failed to execute view on TODO table");
+
+    while (S_OK == (hr = WcaFetchRecord(hView, &hRec)))
+    {
+        // get component
+        hr = WcaGetRecordString(hRec, burbleComponent, &pwzComponent);
+        ExitOnFailure(hr, "Failed to get component");
+
+        // Think long and hard before validating Architecture
+
+        // create entry
+        pItm = (CPI_IMPORTEDCOMPONENT*)::HeapAlloc(::GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(CPI_IMPORTEDCOMPONENT));
+        if (!pItm)
+        {
+            ExitFunction1(hr = E_OUTOFMEMORY);
+        }
+
+        // get component install state
+        er = ::MsiGetComponentStateW(WcaGetInstallHandle(), pwzComponent, &pItm->isInstalled, &pItm->isAction);
+        ExitOnFailure(hr = HRESULT_FROM_WIN32(er), "Failed to get component state");
+
+        // get key
+        hr = WcaGetRecordString(hRec, burbleImportedComponent, &pwzData);
+        ExitOnFailure(hr, "Failed to get key");
+        StringCchCopy(pItm->wzKey, countof(pItm->wzKey), pwzData);
+
+        // no attributes
+
+        // get imported component clsid
+        hr = WcaGetRecordFormattedString(hRec, burbleClsId, &pwzData);
+        ExitOnFailure(hr, "Failed to get imported component CLSID");
+        StringCchCopy(pItm->wzCLSID, countof(pItm->wzCLSID), pwzData);
+
+        // I don't think the alternate way to get an assembly name needs an equivalent
+
+        // get application
+        hr = WcaGetRecordString(hRec, burbleApplication, &pwzData);
+        ExitOnFailure(hr, "Failed to get application");
+
+        if (pwzData && *pwzData)
+        {
+            hr = CpiApplicationFindByKey(pAppList, pwzData, &pItm->pApplication);
+            if (S_FALSE == hr)
+            {
+                hr = HRESULT_FROM_WIN32(ERROR_NOT_FOUND);
+            }
+            ExitOnFailure1(hr, "Failed to find application, key: %S", pwzData);
+        }
+
+        // No paths
+
+        // No sub-parts
+
+        if (WcaIsInstalling(pItm->isInstalled, &pItm->isAction))
+        {
+#error resume coding here.
+        }
+    }
+
+LExit:
+    // clean up
+    if (pItm)
+    {
+        ImportedComponentFree(pItm);
+    }
+
+    ReleaseStr(pwzData);
+    ReleaseStr(pwzComponent);
+
     return hr;
 }
 
