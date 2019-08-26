@@ -216,10 +216,50 @@ static HRESULT ImportedComponentsRead(
 
         // No sub-parts
 
-        if (WcaIsInstalling(pItm->isInstalled, &pItm->isAction))
+        if (WcaIsInstalling(pItm->isInstalled, pItm->isAction))
         {
-#error resume coding here.
+            ++pImpCompList->iInstallCount;
+            // TODO: If/when runInCommit, check and increment.
         }
+        if (WcaIsUninstalling(pItm->isInstalled, pItm->isAction) ||
+            WcaIsReInstalling(pItm->isInstalled, pItm->isAction))
+        {
+            ++pImpCompList->iUninstallCount;
+        }
+        // No role assignments
+
+        // I'm not sure why we're twiddling the application reference count,
+        // but Assemblies did so.
+        if (pItm->pApplication)
+        {
+            if (WcaIsInstalling(pItm->isInstalled, pItm->isAction))
+            {
+                CpiApplicationAddReferenceInstall(pItm->pApplication);
+            }
+            if (WcaIsUninstalling(pItm->isInstalled, pItm->isAction) ||
+                WcaIsReInstalling(pItm->isInstalled, pItm->isAction))
+            {
+                CpiApplicationAddReferenceUninstall(pItm->pApplication);
+            }
+        }
+
+        // add entry
+        if (pImpCompList->pLast)
+        {
+            pImpCompList->pLast->pNext = pItm;
+            pItm->pPrev = pImpCompList->pLast;
+        }
+        else
+        {
+            pImpCompList->pFirst = pItm;
+        }
+        pImpCompList->pLast = pItm;
+        pItm = NULL;
+    }
+
+    if (E_NOMOREITEMS == hr)
+    {
+        hr = S_OK;
     }
 
 LExit:
