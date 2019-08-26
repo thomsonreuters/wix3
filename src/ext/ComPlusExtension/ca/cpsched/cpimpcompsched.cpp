@@ -5,6 +5,10 @@
 
 // sql queries
 
+LPCWSTR vcsImportedComponentQuery =
+    L"SELECT `ImportedComponent`, `Component_`, `Application_`, `CLSID` FROM `ComPlusImportedComponent`";
+enum eImportedComponentQuery { icqImportedComponent = 1, icqComponent, icqApplication, icqCLSID };
+
 // private structs
 
 // property definitions
@@ -49,7 +53,7 @@ HRESULT CpiImportedComponentsRead(
     HRESULT hr = S_OK;
 
     hr = ImportedComponentsRead(pAppList, pImpCompList);
-    ExitOnFailure(hr, "Failed to read TODO table");
+    ExitOnFailure(hr, "Failed to read ComPlusImportedComponent table");
 
     // Any sorting?
 
@@ -162,13 +166,13 @@ static HRESULT ImportedComponentsRead(
     LPWSTR pwzComponent = NULL;
 
     // loop through all imported components
-    hr = WcaOpenExecuteView(L"TODO", &hView);
-    ExitOnFailure(hr, "Failed to execute view on TODO table");
+    hr = WcaOpenExecuteView(vcsImportedComponentQuery, &hView);
+    ExitOnFailure(hr, "Failed to execute view on ComPlusImportedComponent table");
 
     while (S_OK == (hr = WcaFetchRecord(hView, &hRec)))
     {
         // get component
-        hr = WcaGetRecordString(hRec, burbleComponent, &pwzComponent);
+        hr = WcaGetRecordString(hRec, icqComponent, &pwzComponent);
         ExitOnFailure(hr, "Failed to get component");
 
         // Think long and hard before validating Architecture
@@ -185,21 +189,21 @@ static HRESULT ImportedComponentsRead(
         ExitOnFailure(hr = HRESULT_FROM_WIN32(er), "Failed to get component state");
 
         // get key
-        hr = WcaGetRecordString(hRec, burbleImportedComponent, &pwzData);
+        hr = WcaGetRecordString(hRec, icqImportedComponent, &pwzData);
         ExitOnFailure(hr, "Failed to get key");
         StringCchCopy(pItm->wzKey, countof(pItm->wzKey), pwzData);
 
         // no attributes
 
         // get imported component clsid
-        hr = WcaGetRecordFormattedString(hRec, burbleClsId, &pwzData);
+        hr = WcaGetRecordFormattedString(hRec, icqCLSID, &pwzData);
         ExitOnFailure(hr, "Failed to get imported component CLSID");
         StringCchCopy(pItm->wzCLSID, countof(pItm->wzCLSID), pwzData);
 
         // I don't think the alternate way to get an assembly name needs an equivalent
 
         // get application
-        hr = WcaGetRecordString(hRec, burbleApplication, &pwzData);
+        hr = WcaGetRecordString(hRec, icqApplication, &pwzData);
         ExitOnFailure(hr, "Failed to get application");
 
         if (pwzData && *pwzData)

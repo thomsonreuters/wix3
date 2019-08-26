@@ -78,6 +78,10 @@ void CpiInitialize()
     if (S_OK == WcaTableExists(L"ComPlusRoleForMethod"))           giTables |= cptComPlusRoleForMethod;
     if (S_OK == WcaTableExists(L"ComPlusSubscription"))            giTables |= cptComPlusSubscription;
     if (S_OK == WcaTableExists(L"ComPlusSubscriptionProperty"))    giTables |= cptComPlusSubscriptionProperty;
+    if (S_OK == WcaTableExists(L"ComPlusImportedComponent"))
+    {
+        giTables |= cptComPlusImportedComponent;
+    }
 }
 
 void CpiFinalize()

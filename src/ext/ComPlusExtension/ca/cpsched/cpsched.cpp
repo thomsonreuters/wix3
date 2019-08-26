@@ -182,7 +182,7 @@ extern "C" UINT __stdcall ConfigureComPlusInstall(MSIHANDLE hInstall)
         MessageExitOnFailure(hr, msierrComPlusUserInApplicationRoleReadFailed, "Failed to read ComPlusUserInApplicationRole table");
     }
 
-    if (CpiTableExists(/*TODO: Table*/42))
+    if (CpiTableExists(cptComPlusImportedComponent))
     {
         hr = CpiImportedComponentsRead(&appList, &impCompList);
         MessageExitOnFailure(hr, msierrComPlusImportedComponentReadFailed, "Failed to read ComPlusTODO table")

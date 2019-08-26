@@ -36,7 +36,8 @@ enum eComPlusTables
     cptComPlusMethodProperty          = (1 << 21),
     cptComPlusRoleForMethod           = (1 << 22),
     cptComPlusSubscription            = (1 << 23),
-    cptComPlusSubscriptionProperty    = (1 << 24)
+    cptComPlusSubscriptionProperty    = (1 << 24),
+    cptComPlusImportedComponent = (1 << 25),
 };
 
 
