@@ -111,8 +111,14 @@ HRESULT CpiImportedComponentsInstall(
         //action type
         if (rmRollback == iRunMode)
         {
-            // Bizarro check on ItemState to do here
-            iActionType = atRemove;
+            if (CpiIsInstalled(pItm->isInstalled))
+            {
+                iActionType = atNoOp;
+            }
+            else
+            {
+                iActionType = atRemove;
+            }
         }
         else
         {
