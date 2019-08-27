@@ -247,4 +247,14 @@
     <columnDefinition name="Value" type="string" length="255" modularize="property"
         category="formatted" description=""/>
   </tableDefinition>
+    <tableDefinition name="ComPlusImportedComponent" createSymbols="yes">
+        <columnDefinition name="ComPlusImportedComponent" type="string" length="72" primaryKey="yes" modularize="column"
+            category="identifier" description=""/>
+        <columnDefinition name="Component_" type="string" length="72" modularize="column"
+            keyTable="Component" keyColumn="1" category="identifier" description=""/>
+        <columnDefinition name="Application_" type="string" length="72" modularize="column"
+            keyTable="ComPlusApplication" keyColumn="1" category="identifier" description=""/>
+        <columnDefinition name="CLSID" type="string" length="72" modularize="property"
+            category="formatted" description=""/>
+    </tableDefinition>
 </tableDefinitions>
