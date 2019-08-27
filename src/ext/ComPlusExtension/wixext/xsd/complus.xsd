@@ -222,6 +222,7 @@
         <xs:choice minOccurs="0" maxOccurs="unbounded">
           <xs:element ref="ComPlusApplicationRole" />
           <xs:element ref="ComPlusAssembly" />
+          <xs:element ref="ComPlusImportedComponent" />
         </xs:choice>
       </xs:sequence>
       <xs:attribute name="Id" use="required" type="xs:string">
@@ -921,6 +922,49 @@
       <xs:attribute name="UserName" use="optional" type="xs:string" />
     </xs:complexType>
   </xs:element>
+
+    <xs:element name="ComPlusImportedComponent">
+        <xs:annotation>
+            <xs:documentation>
+                Represents a COM Class, already registered somehow, to be used
+                by this COM+ Application.
+                The element must be a descendent of a Component element,
+                it can not be a child of a ComPlusApplication locator element.
+                Current system limitations: Must be a child of ComPlusApplication.
+            </xs:documentation>
+            <xs:appinfo>
+                <xse:remarks>
+                    <html:p>
+                        This element, at the end of the day results in a call to
+                        ICOMAdminCatalog::ImportComponent, which associates a
+                        given COM Class with an indicated COM+ Application.
+                    </html:p>
+
+                    <html:p>
+                        Contrast ICOMAdminCatalog::InstallComponent, used by
+                        ComPlusAssembly, which associates all COM Classes and
+                        Interfaces described by the mandatory TypeLib with the
+                        indicated COM+ Applicaton.
+                    </html:p>
+                </xse:remarks>
+            </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+            <!-- Only Attributes for now. -->
+            <xs:attribute name="Id" use="required" type="xs:string">
+                <xs:annotation><xs:documentation>
+                    Identifier for the element.
+                </xs:documentation></xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="CLSID" use="required" type="uuid">
+                <xs:annotation><xs:documentation>
+                    CLSID of the component.
+                </xs:documentation></xs:annotation>
+            </xs:attribute>
+            <!-- Future enhancement? Application ? -->
+            <!-- Future enhancement? RegisterInCommit ? -->
+        </xs:complexType>
+    </xs:element>
 
   <xs:simpleType name="YesNoType">
     <xs:annotation>
