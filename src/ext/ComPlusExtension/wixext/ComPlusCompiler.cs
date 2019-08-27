@@ -104,6 +104,7 @@ namespace Microsoft.Tools.WindowsInstallerXml.Extensions
                         case "ComPlusSubscription":
                             this.ParseComPlusSubscriptionElement(element, componentId, null);
                             break;
+                        // Possible future enhancement: allow ComPlusImportedComponent as child of Component?
                         default:
                             this.Core.UnexpectedElement(parentElement, element);
                             break;
@@ -947,6 +948,9 @@ namespace Microsoft.Tools.WindowsInstallerXml.Extensions
                             break;
                         case "ComPlusAssembly":
                             this.ParseComPlusAssemblyElement(child, componentKey, win64, key);
+                            break;
+                        case "ComPlusImportedComponent":
+                            this.ParseComPlusImportedComponentElement(child, componentKey, win64, key);
                             break;
                         default:
                             this.Core.UnexpectedElement(node, child);
@@ -2007,6 +2011,47 @@ namespace Microsoft.Tools.WindowsInstallerXml.Extensions
                 propertyRow[1] = (string)propertiesEnumerator.Key;
                 propertyRow[2] = (string)propertiesEnumerator.Value;
             }
+        }
+
+        /// <summary>
+        /// Parses a COM+ imported component element.
+        /// </summary>
+        /// <param name="node">Element to parse.</param>
+        /// <param name="componentKey">Identifier of ancestor component.</param>
+        /// <param name="win64">Is the installer a 64-bit installer?</param>
+        /// <param name="applicationKey">Identifier of parent application.</param>
+        private void ParseComPlusImportedComponentElement(XmlNode node, string componentKey, bool win64, string applicationKey)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+
+            string key = null;
+            string clsid = null;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                switch (attrib.LocalName)
+                {
+                    case "Id":
+                        key = this.Core.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                        break;
+                    case "CLSID":
+                        clsid = "{" + this.Core.GetAttributeValue(sourceLineNumbers, attrib) + "}";
+                        break;
+                    default:
+                        this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            // ParseComPlusRoleForInterfaceElement doesn't validate componentKey
+
+            // ParseComPlusComponentElement doesn't validate a non-null clsid
+
+            Row row = this.Core.CreateRow(sourceLineNumbers, "ComPlusImportedComponent");
+            row[0] = key;
+            row[1] = componentKey;
+            row[2] = applicationKey;
+            row[3] = clsid;
         }
 
         /// <summary>
