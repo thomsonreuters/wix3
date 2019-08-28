@@ -962,7 +962,17 @@
                 </xs:documentation></xs:annotation>
             </xs:attribute>
             <!-- Future enhancement? Application ? -->
-            <!-- Future enhancement? RegisterInCommit ? -->
+            <xs:attribute name="RegisterInCommit" use="optional" type="YesNoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        Indicates that the assembly should be installed in the
+                        commit custom action instead of the normal deferred custom action. This is
+                        necessary when installing classes that were registered earlier in the same
+                        install, as the coclass is not known until after the
+                        InstallFinalize action has run.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 

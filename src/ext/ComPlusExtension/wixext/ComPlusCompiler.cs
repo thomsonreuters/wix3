@@ -36,6 +36,14 @@ namespace Microsoft.Tools.WindowsInstallerXml.Extensions
         }
 
         /// <summary>
+        /// </summary>
+        /// <remarks></remarks>
+        public enum CpiImportedComponentAttributes
+        {
+            RegisterInCommit = (1 << 0),
+        }
+
+        /// <summary>
         /// Gets the schema for this extension.
         /// </summary>
         /// <value>Schema for this extension.</value>
@@ -2026,6 +2034,7 @@ namespace Microsoft.Tools.WindowsInstallerXml.Extensions
 
             string key = null;
             string clsid = null;
+            int attributes = 0;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -2036,6 +2045,16 @@ namespace Microsoft.Tools.WindowsInstallerXml.Extensions
                         break;
                     case "CLSID":
                         clsid = "{" + this.Core.GetAttributeValue(sourceLineNumbers, attrib) + "}";
+                        break;
+                    case "RegisterInCommit":
+                        if (YesNoType.Yes == this.Core.GetAttributeYesNoValue(sourceLineNumbers, attrib))
+                        {
+                            attributes |= (int)CpiImportedComponentAttributes.RegisterInCommit;
+                        }
+                        else
+                        {
+                            attributes &= ~(int)CpiImportedComponentAttributes.RegisterInCommit;
+                        }
                         break;
                     default:
                         this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
@@ -2052,6 +2071,7 @@ namespace Microsoft.Tools.WindowsInstallerXml.Extensions
             row[1] = componentKey;
             row[2] = applicationKey;
             row[3] = clsid;
+            row[4] = attributes;
         }
 
         /// <summary>
