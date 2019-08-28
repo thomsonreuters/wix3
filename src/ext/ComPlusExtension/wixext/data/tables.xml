@@ -256,5 +256,7 @@
             keyTable="ComPlusApplication" keyColumn="1" category="identifier" description=""/>
         <columnDefinition name="CLSID" type="string" length="72" modularize="property"
             category="formatted" description=""/>
+        <columnDefinition name="Attributes" type="number" length="4"
+            description=""/>
     </tableDefinition>
 </tableDefinitions>

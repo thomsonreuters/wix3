@@ -6,8 +6,8 @@
 // sql queries
 
 LPCWSTR vcsImportedComponentQuery =
-    L"SELECT `ImportedComponent`, `Component_`, `Application_`, `CLSID` FROM `ComPlusImportedComponent`";
-enum eImportedComponentQuery { icqImportedComponent = 1, icqComponent, icqApplication, icqCLSID };
+    L"SELECT `ImportedComponent`, `Component_`, `Application_`, `CLSID`, `Attributes` FROM `ComPlusImportedComponent`";
+enum eImportedComponentQuery { icqImportedComponent = 1, icqComponent, icqApplication, icqCLSID, icqAttributes };
 
 // private structs
 
@@ -51,6 +51,9 @@ HRESULT CpiImportedComponentsRead(
     )
 {
     HRESULT hr = S_OK;
+
+    // Debugging aid.
+    //::MessageBoxW(NULL, L"Beginning CpiImportedComponentsRead", L"Debug now if desired", MB_OK);
 
     hr = ImportedComponentsRead(pAppList, pImpCompList);
     ExitOnFailure(hr, "Failed to read ComPlusImportedComponent table");
@@ -105,8 +108,14 @@ HRESULT CpiImportedComponentsInstall(
             continue;
         }
 
-        // The purpose of aaRunInCommit's is explained in the manual
-        // for the ComPlusAssembly element. Not repeating it here yet.
+        // imported components must be scheduled during the right type of action
+        // If we are trying to import a component that was registered via
+        // a COM element, we must defer to commit.
+        BOOL fRunInCommit = 0 != (pItm->iAttributes & icaRunInCommit);
+        if ((rmCommit == iRunMode && !fRunInCommit) || (rmDeferred == iRunMode && fRunInCommit))
+        {
+            continue;
+        }
 
         //action type
         if (rmRollback == iRunMode)
@@ -199,7 +208,9 @@ static HRESULT ImportedComponentsRead(
         ExitOnFailure(hr, "Failed to get key");
         StringCchCopy(pItm->wzKey, countof(pItm->wzKey), pwzData);
 
-        // no attributes
+        // get attributes
+        hr = WcaGetRecordInteger(hRec, icqAttributes, &pItm->iAttributes);
+        ExitOnFailure(hr, "Failed to get attributes");
 
         // get imported component clsid
         hr = WcaGetRecordFormattedString(hRec, icqCLSID, &pwzData);
@@ -229,7 +240,10 @@ static HRESULT ImportedComponentsRead(
         if (WcaIsInstalling(pItm->isInstalled, pItm->isAction))
         {
             ++pImpCompList->iInstallCount;
-            // TODO: If/when runInCommit, check and increment.
+            if (pItm->iAttributes & icaRunInCommit)
+            {
+                ++pImpCompList->iCommitCount;
+            }
         }
         if (WcaIsUninstalling(pItm->isInstalled, pItm->isAction) ||
             WcaIsReInstalling(pItm->isInstalled, pItm->isAction))
@@ -306,6 +320,8 @@ static HRESULT AddImportedComponentToActionData(
     ExitOnFailure(hr, "Failed to add imported component key to custom action data");
     hr = WcaWriteStringToCaData(pItm->wzCLSID, ppwzActionData);
     ExitOnFailure(hr, "Failed to add imported component clsid to custom action data");
+    hr = WcaWriteIntegerToCaData(pItm->iAttributes, ppwzActionData);
+    ExitOnFailure(hr, "Failed to add imported component attributes to custom action data");
 
     // add application information to custom action data
     hr = WcaWriteStringToCaData(pItm->pApplication ? pItm->pApplication->wzID : L"", ppwzActionData);

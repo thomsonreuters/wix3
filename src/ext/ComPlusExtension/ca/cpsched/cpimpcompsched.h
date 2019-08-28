@@ -1,6 +1,11 @@
 #pragma once
 // Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the Microsoft Reciprocal License. See LICENSE.TXT file in the project root for full license information.
 
+enum eImportedComponentAttributes
+{
+    icaRunInCommit = (1 << 0),
+};
+
 // structs
 
 struct CPI_IMPORTEDCOMPONENT
@@ -10,7 +15,8 @@ struct CPI_IMPORTEDCOMPONENT
     // I don't think a Module makes sense here.
     WCHAR wzCLSID[CPI_MAX_GUID + 1];
 
-    // Assembly Attributes was a bitflag for things like whether it was from the GAC.
+    // Does it require deferred-to-commit-stage processing?
+    int iAttributes;
 
     // No children here, like Assembly had Components
 

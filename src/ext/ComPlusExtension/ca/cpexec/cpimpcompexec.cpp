@@ -2,6 +2,13 @@
 
 #include "precomp.h"
 
+// private constants
+
+enum eImportedComponentAttributes
+{
+    icaRunInCommit = (1 << 0),
+};
+
 // private structs
 
 // Similar to CPI_ASSEMBLY_ATTRIBUTES
@@ -13,7 +20,7 @@ struct CPI_IMPORTED_COMPONENT_ATTRIBUTES
     WCHAR wzClsId[CPI_MAX_GUID + 1];
     LPWSTR pwzAppID;
     LPWSTR pwzPartID;
-    // Attributes?
+    int iAttributes;
 };
 
 // prototypes for private helper functions
@@ -40,6 +47,9 @@ HRESULT CpiConfigureImportedComponents(
     )
 {
     HRESULT hr = E_NOTIMPL;
+
+    // Debugging aid.
+    //::MessageBoxW(NULL, L"Beginning CpiConfigureImportedComponents", L"Debug now if desired", MB_OK);
 
     CPI_IMPORTED_COMPONENT_ATTRIBUTES attrs;
     ::ZeroMemory(&attrs, sizeof(attrs));
@@ -122,6 +132,8 @@ static HRESULT ReadImportedComponentAttributes(
     ExitOnFailure(hr, "Failed to read clsid");
     hr = StringCchCopyW(pAttrs->wzClsId, countof(pAttrs->wzClsId), pwzData);
     ExitOnFailure(hr, "Failed to copy clsid");
+    hr = WcaReadIntegerFromCaData(ppwzData, &pAttrs->iAttributes);
+    ExitOnFailure(hr, "Failed to read attributes");
     hr = WcaReadStringFromCaData(ppwzData, &pAttrs->pwzAppID);
     ExitOnFailure(hr, "Failed to read application id");
     hr = WcaReadStringFromCaData(ppwzData, &pAttrs->pwzPartID);
