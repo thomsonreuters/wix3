@@ -330,6 +330,7 @@ LExit:
     CpiApplicationListFree(&appList);
     CpiApplicationRoleListFree(&appRoleList);
     CpiUserInApplicationRoleListFree(&usrInAppRoleList);
+    CpiImportedComponentListFree(&impCompList);
     CpiAssemblyListFree(&asmList);
     CpiSubscriptionListFree(&subList);
 
